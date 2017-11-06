@@ -5,7 +5,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   devtool: 'source-map',//开发工具
-  entry:__dirname  + '/app/main.js',//唯一入口
+  entry:{
+    app:'./app/main.js',//唯一入口
+    common: ['jquery'],//公共js文件
+  },
   output:{
     path:__dirname +'/public',//打包后文件存放目录
     filename:'bundle.js'
@@ -66,7 +69,7 @@ module.exports = {
         loader: require.resolve('url-loader'),
         options: {
           limit: 10000,
-          name: 'static/media/[name].[hash:8].[ext]',
+          name: '[name].[hash:8].[ext]',
         }
       }
     ]

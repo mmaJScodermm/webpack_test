@@ -4,18 +4,23 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const extractLess = new ExtractTextPlugin({
-    filename: "[name].[contenthash].css",
-    disable: process.env.NODE_ENV === "development"
+    publicPath: './',
+    filename: "css/[name].[contenthash].css",
+    disable: process.env.NODE_ENV === "development",
+    allChunks: true
 });
 
 
 module.exports = {
-    entry: __dirname + "/app/main.js", //已多次提及的唯一入口文件
+    entry:{
+      app:'./app/main.js',//唯一入口
+      common: ['jquery'],//公共js文件
+    },
     devtool: '#source-map',
     output: {
         path: __dirname + "/build/page1",
-        publicPath:'./',
-        filename: "bundle-[hash].js"//打包文件
+        publicPath:'http://localhost:8080/',
+        filename: "js/bundle-[hash].js"//打包文件
     },
     devServer: {
         contentBase: "./public", //本地服务器所加载的页面所在的目录
@@ -80,18 +85,32 @@ module.exports = {
           })
         },
         {
-          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-          loader: require.resolve('url-loader'),
-          options: {
-            limit: 10000,
-            name: '[name].[hash:8].[ext]',
-            outputPath:'dist/media'
+　　　　　　test: /\.html$/,
+　　　　　　loader: 'html-withimg-loader',
+          query: {
+              publicPath: './page1/'
+          }
+　　　　  },
+        // {
+        //   test: /\.(png|jpg|gif|svg)$/,
+        //   loader: 'url-loader',
+        //   query: {
+        //       limit: 10,
+        //       publicPath: './',
+        //       name: 'images/[hash:8].[name].[ext]'
+        //   }
+        // },
+        {
+          test: /\.(png|jpe?g|gif|ico)(\?\S*)?$/,
+          loader: 'file-loader',
+          query: {
+              limit: 1000,
+              name: 'images/[hash:8].[name].[ext]'
           }
         },
       ]
     },
     plugins: [
-        new webpack.BannerPlugin('CopyRight by JYZ'),//打包banner
         new HtmlWebpackPlugin({
             template: __dirname + "/app/index.html" ,//new 一个这个插件的实例，并传入相关的参数
             minify: {
@@ -108,7 +127,7 @@ module.exports = {
         }),
         new webpack.optimize.CommonsChunkPlugin({    //打包公共文件
            name: 'common',
-           filename: 'common.bundle.js'
+           filename: 'js/common.bundle.js'
         }),
         new webpack.optimize.UglifyJsPlugin({  //打包js文件 进行压缩
           drop_console: true,
@@ -117,6 +136,7 @@ module.exports = {
             comments: false
           }
         }),
-        extractLess//less
+        extractLess,//less
+        new webpack.BannerPlugin('CopyRight by JYZ'),//打包banner
     ],
 };
